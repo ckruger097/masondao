@@ -139,3 +139,29 @@ button:disabled {
   opacity: 0.8;
   pointer-events: none;
 }
+
+.collapsible_button {
+  background-color: #fff;
+  text-align: center;
+  font-weight: bold;
+  font-family: inherit;
+  color: #222;
+  padding: 20px;
+}
+
+.radioBlock {
+/*   padding: 5px; */
+  margin-top : 20px;
+  margin-bottom: 20px;
+  width: 50%;
+}
+
+.radio-left {
+  float: left;
+  width = 50%;
+}
+
+.radio-right {
+  float: right;
+  width = 50%;
+}

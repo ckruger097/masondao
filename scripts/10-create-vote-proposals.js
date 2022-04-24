@@ -1,5 +1,7 @@
 import sdk from "./1-initialize-sdk.js";
 import { ethers } from "ethers";
+import { Component } from "react";
+
 
 // This is our governance contract.
 const vote = sdk.getVote("0x795845dD8D2d997a8e6D4899C082507f14f58F6c");
@@ -73,55 +75,68 @@ const token = sdk.getToken("0xEAf02dE0D8Df901Eb230d1642366455989658d53");
 //   }
 // })();
 
-async function newTransferProposal (amount, description, numTokens){
-  try{
-    const executions = [
-    {
-      nativeTokenValue: numTokens,
-      transactionData: token.encoder.encode (
-        "transfer",
-        [
-          process.env.WALLET_ADDRESS,
-          ethers.utils.parseUnits(amount.toString(), 18),
-        ]
-      ),
-      toAddress: token.getAddress(),
-    },
-  ];
-
-  await vote.propose(description, executions);
+class proposal extends Component {
   
-  console.log(
-      "✅ Successfully created proposal, let's hope people vote for it!"
-    );
-  } catch (error) {
-    console.error("failed to create proposal", error);
+  constructor(props)
+  super(props)
+  
+  const newTransferProposal = async(amount, description, numTokens) => {
+    try{
+      const executions = [
+      {
+        nativeTokenValue: numTokens,
+        transactionData: token.encoder.encode (
+          "transfer",
+          [
+            process.env.WALLET_ADDRESS,
+            ethers.utils.parseUnits(amount.toString(), 18),
+          ]
+        ),
+        toAddress: token.getAddress(),
+      },
+    ];
+  
+    await vote.propose(description, executions);
+    
+    console.log(
+        "✅ Successfully created proposal, let's hope people vote for it!"
+      );
+    } catch (error) {
+      console.error("failed to create proposal", error);
+    }
+  }
+  
+  const newMintProposal = async(amount, description, numTokens) => {
+    try{
+      const executions = [
+      {
+        nativeTokenValue: numTokens,
+        transactionData: token.encoder.encode (
+          "mintTo",
+          [
+            vote.getAddress(),
+            ethers.utils.parseUnits(amount.toString(), 18),
+          ]
+        ),
+        toAddress: token.getAddress(),
+      },
+    ];
+  
+    await vote.propose(description, executions);
+    
+    console.log(
+        "✅ Successfully created proposal, let's hope people vote for it!"
+      );
+    } catch (error) {
+      console.error("failed to create proposal", error);
+    }
+  }
+
+  render () {
+    return {
+      <
+    };
   }
 }
 
-async function newMintProposal (amount, description, numTokens){
-  try{
-    const executions = [
-    {
-      nativeTokenValue: numTokens,
-      transactionData: token.encoder.encode (
-        "mintTo",
-        [
-          vote.getAddress(),
-          ethers.utils.parseUnits(amount.toString(), 18),
-        ]
-      ),
-      toAddress: token.getAddress(),
-    },
-  ];
-
-  await vote.propose(description, executions);
-  
-  console.log(
-      "✅ Successfully created proposal, let's hope people vote for it!"
-    );
-  } catch (error) {
-    console.error("failed to create proposal", error);
-  }
-}
-
+export default proposal
