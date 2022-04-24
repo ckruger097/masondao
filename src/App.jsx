@@ -1,6 +1,12 @@
 import { useAddress, useMetamask, useEditionDrop, useToken, useVote } from '@thirdweb-dev/react';
 import { useState, useEffect, useMemo } from 'react';
 import { AddressZero } from "@ethersproject/constants";
+import { ThirdwebSDK } from "@thirdweb-dev/sdk";
+import buffer from 'buffer';
+// import Accordion from 'react-native-collapsible/Accordion';
+// import {ExpandableListView} from 'react-native-expandable-listview';
+import panel from "../scripts/12-expandable-panel.jsx";
+// import {ethers} from "ethers";
 
 const App = () => {
   // Use the hooks thirdweb give us.
@@ -8,12 +14,19 @@ const App = () => {
   const connectWithMetamask = useMetamask();
   console.log("👋 Address:", address);
 
+  const {Buffer} = buffer;
+  window.Buffer = Buffer;
+
+  // const provider = ethers.Wallet.createRandom();
+  const sdk = new ThirdwebSDK();
+  const contract = sdk.getNFTCollection("0x369409b220C7220e4651Ebd20A36B6F363757959");
+
   // Initialize our editionDrop contract
   const editionDrop = useEditionDrop("0xF5196121ad73CbfE61451CF128c71CB7A523876C");
     // Initialize our token contract
-const token = useToken("0xEAf02dE0D8Df901Eb230d1642366455989658d53")
+    const token = useToken("0xEAf02dE0D8Df901Eb230d1642366455989658d53")
 
-const vote = useVote("0x795845dD8D2d997a8e6D4899C082507f14f58F6c");
+    const vote = useVote("0x795845dD8D2d997a8e6D4899C082507f14f58F6c");
 
   // State variable for us to know if user has our NFT.
   const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
@@ -129,8 +142,9 @@ const memberList = useMemo(() => {
     // If we are, we'll return the amount of token the user has.
     // Otherwise, return 0.
     const member = memberTokenAmounts?.find(({ holder }) => holder === address);
-
+    const memberName = "MasonMember"  
     return {
+      memberName,  
       address,
       tokenAmount: member?.balance.displayValue || "0",
     }
@@ -165,7 +179,37 @@ const memberList = useMemo(() => {
     try {
       setIsClaiming(true);
       await editionDrop.claim("0", 1);
-      console.log(`🌊 Successfully Minted! Check it out on OpenSea: https://testnets.opensea.io/assets/${editionDrop.getAddress()}/0`);
+      const metadata = {
+        name: "CS 499 NFT",
+        description: "This is an NFT for CS 499",
+        image: "https://cdn.discordapp.com/attachments/935710105306038352/965453931461365760/character5.png",
+      };
+    
+      // const tx = await contract.mintTo(address, metadata);
+      // const receipt = tx.receipt; // the transaction receipt
+      // const tokenId = tx.id; // the id of the NFT minted
+      // const nft = await tx.data(); // (optional) fetch details of minted NFT
+      // console.log(nft);
+      
+      const startTime = new Date();
+      const endTime = new Date(Date.now() + 60 * 60 * 24 * 1000);
+      const payload = {
+        metadata: metadata, // The NFT to mint
+        to: address, // Who will receive the NFT (or AddressZero for anyone)
+        price: 0.1, // the price to pay for minting
+        //currencyAddress: NATIVE_TOKEN_ADDRESS, // the currency to pay with
+        mintStartTime: startTime, // can mint anytime from now
+        mintEndTime: endTime, // to 24h from now,
+        //royaltyRecipient: "0x...", // custom royalty recipient for this NFT
+        royaltyBps: 100, // custom royalty fees for this NFT (in bps)
+        //primarySaleRecipient: "0x...", // custom sale recipient for this NFT
+      };
+      
+      const signedPayload = contract.signature.generate(payload);
+
+      contract.signature.mint(signedPayload);
+    
+      //console.log(`🌊 Successfully Minted! Check it out on OpenSea: https://testnets.opensea.io/assets/${editionDrop.getAddress()}/0`);
       setHasClaimedNFT(true);
     } catch (error) {
       setHasClaimedNFT(false);
@@ -202,6 +246,7 @@ const memberList = useMemo(() => {
             <table className="card">
               <thead>
                 <tr>
+                  <th>Member Name</th>  
                   <th>Address</th>
                   <th>Token Amount</th>
                 </tr>
@@ -210,6 +255,7 @@ const memberList = useMemo(() => {
                 {memberList.map((member) => {
                   return (
                     <tr key={member.address}>
+                      <td>{member.memberName}</td>  
                       <td>{shortenAddress(member.address)}</td>
                       <td>{member.tokenAmount}</td>
                     </tr>
@@ -218,8 +264,10 @@ const memberList = useMemo(() => {
               </tbody>
             </table>
           </div>
+          
           <div>
-            <h2>Active Proposals</h2>
+            <h2>Proposals</h2>
+            
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -342,6 +390,7 @@ const memberList = useMemo(() => {
               )}
             </form>
           </div>
+            <div><h2>Expired Proposals</h2></div>
         </div>
       </div>
     );
