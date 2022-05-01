@@ -233,6 +233,7 @@ const memberList = useMemo(() => {
   return (
     <div className="landing">
       <h1>Welcome to MasonDAO! 🟩🟨</h1>
+         <h3>If you don't have a wallet, <a href = "https://metamask.io/" target="_blank">click here</a> before connecting</h3>
       <button onClick={connectWithMetamask} className="btn-hero">
         Connect your wallet
       </button>
