@@ -1,5 +1,6 @@
-import { useAddress, useMetamask, useEditionDrop, useToken, useVote } from '@thirdweb-dev/react';
+import { useAddress, useMetamask, useEditionDrop, useToken, useVote, useNetwork} from '@thirdweb-dev/react';
 import { useState, useEffect, useMemo } from 'react';
+import { ChainId } from '@thirdweb-dev/sdk'
 import { AddressZero } from "@ethersproject/constants";
 import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 import buffer from 'buffer';
@@ -11,6 +12,8 @@ import TextField from "@material-ui/core/TextField"
 const App = () => {
   // Use the hooks thirdweb give us.
   const address = useAddress();
+  const network = useNetwork();
+
   const connectWithMetamask = useMetamask();
   console.log("👋 Address:", address);
 
@@ -219,6 +222,18 @@ const memberList = useMemo(() => {
       setIsClaiming(false);
     }
   };
+
+    if (address && (network?.[0].data.chain.id !== ChainId.Rinkeby)) {
+  return (
+    <div className="unsupported-network">
+      <h2>Please connect to Rinkeby</h2>
+      <p>
+        This dapp only works on the Rinkeby network, please switch networks
+        in your connected wallet.
+      </p>
+    </div>
+  );
+}
 
   const newProposal = async(amount, description, numTokens) => {
     if (!hasClaimedNFT){
@@ -437,7 +452,11 @@ const memberList = useMemo(() => {
               className="collapsible_button"
             >
             </Collapsible>
-            
+            <div>
+            <a href="https://discord.gg/Z8mbqwym7g">
+            <center><img src="https://imgur.com/ZOKp8LH.jpg" alt="discord icon" height="50" width = "50" align="bottom"></img></center>
+            </a>
+            </div>
           </div>
         </div>
       </div>
